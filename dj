@@ -1,0 +1,72 @@
+#!/usr/bin/env sh
+
+set -e
+
+usage() {
+    echo "Usage: $(basename "$0") <command>"
+    echo ""
+    echo "Commands:"
+    echo "  check             Run lint, format, types, and test"
+    echo "  lint              Run ruff linter with auto-fix"
+    echo "  format            Run ruff formatter"
+    echo "  types             Run type checking"
+    echo "  test              Run tests with pytest"
+    echo ""
+    echo "  runserver         Start Django dev server"
+    echo "  shell_plus        Open Django shell_plus"
+    echo ""
+    echo "  showmigrations    Show Django migrations"
+    echo "  makemigrations    Create Django migrations"
+    echo "  migrate           Apply Django migrations"
+    echo ""
+    echo "  update            Upgrade and sync uv packages"
+    echo "  init_env          Create fresh .venv and install deps"
+    echo "  create_secret_key Create a secrekt key for Django"
+    echo ""
+}
+
+cmd_check()             { cmd_lint; cmd_format; cmd_types; cmd_test; echo "✅"; }
+cmd_lint()              { uv run ruff check --fix; }
+cmd_format()            { uv run ruff format; }
+cmd_types()             { uv run ty check; }
+cmd_test()              { uv run pytest .; }
+
+cmd_runserver()         { uv run python manage.py runserver; }
+cmd_shell_plus()        { uv run python manage.py shell_plus; }
+
+cmd_showmigrations()    { uv run python manage.py showmigrations; }
+cmd_makemigrations()    { uv run python manage.py makemigrations; }
+cmd_migrate()           { uv run python manage.py migrate; }
+
+cmd_update()            { uv lock --upgrade; uv sync; }
+cmd_init_env()          { rm -rf .venv; uv venv; uv sync; uv run pre-commit install;  }
+cmd_create_secret_key() { uv run python -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())'; }
+
+
+if [ $# -eq 0 ]; then
+    usage
+    exit 1
+fi
+
+case "$1" in
+    lint)              cmd_lint ;;
+    format)            cmd_format ;;
+    types)             cmd_types ;;
+    test)              cmd_test ;;
+    check)             cmd_check ;;
+    runserver)         cmd_runserver ;;
+    shell_plus)        cmd_shell_plus ;;
+    showmigrations)    cmd_showmigrations ;;
+    makemigrations)    cmd_makemigrations ;;
+    migrate)           cmd_migrate ;;
+    update)            cmd_update ;;
+    init_env)          cmd_init_env ;;
+    create_secret_key) cmd_create_secret_key ;;
+    help|-h|--help)    usage ;;
+    *)
+        echo "Unknown command: $1" >&2
+        echo ""
+        usage
+        exit 1
+        ;;
+esac
