@@ -1,4 +1,4 @@
-# DJ
+# dj
 
 ## Why
 If you work with [Python](https://python.org) and [Django](https://djangoproject.com) and use `uv`
